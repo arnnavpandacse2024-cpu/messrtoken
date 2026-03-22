@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NIST University Admin Portal</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-database-compat.js"></script>
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">NIST University</p>
+        <h1>Hostel Mess Token Admin Portal</h1>
+        <p class="subtitle">Manage tokens, assess mess records and open/close token booking.</p>
+      </div>
+      <div class="logo-card">
+        <span class="logo-pill">Admin</span>
+        <p>Control Panel</p>
+      </div>
+    </header>
+
+    <main class="card-panel">
+      <!-- Admin Dashboard Section -->
+      <section class="form-page" id="page5">
+        <div class="section-header">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+            <h2>Admin Mess Assessment (Cloud Synced)</h2>
+            <span id="statusBadge" style="font-size:0.8rem; padding:4px 10px; border-radius:20px; background:#f0f9ff; color:#0369a1; border:1px solid #bae1ff; display:flex; align-items:center; gap:5px;">
+              <span style="width:6px; height:6px; background:#0ea5e9; border-radius:50%;"></span>
+              Server Connected
+            </span>
+            <span id="dbStatusBadge" style="font-size:0.8rem; padding:4px 10px; border-radius:20px; background:#fef2f2; color:#991b1b; border:1px solid #fecaca; display:flex; align-items:center; gap:5px;">
+              <span id="dbStatusDot" style="width:6px; height:6px; background:#ef4444; border-radius:50%;"></span>
+              DB: Checking...
+            </span>
+            <button id="manualSyncBtn" class="btn ghost" style="padding:4px 10px; font-size:0.75rem;">Sync Now</button>
+          </div>
+          <p>Filter by hostel, roll number, and food type to assess veg/non-veg details.</p>
+        </div>
+
+        <!-- NEW: Real-time Open/Close Tokens -->
+        <div class="admin-settings" style="display:grid; gap:10px; margin-bottom:12px; padding:15px; border:2px solid #bae1ff; background:#eef6ff; border-radius:8px;">
+          <h3>Booking Status Control</h3>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <div style="padding: 10px 20px; border-radius: 8px; background: #fff; border: 1px solid var(--border); display: flex; align-items: center; gap: 10px;">
+              <div id="statusIndicator" style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444;"></div>
+              <strong style="font-size: 0.95rem;">Current Status: <span id="adminBookingStatusBadge">Closed</span></strong>
+            </div>
+            <button id="adminOpenBookingBtn" class="btn primary" style="background-color: var(--success);">Open Token Booking</button>
+            <button id="adminCloseBookingBtn" class="btn primary" style="background-color: var(--danger);">Close Token Booking</button>
+          </div>
+          <p id="adminStatusHint" class="subtitle" style="margin-top:8px; font-size:0.85rem;">Status changes sync immediately to all devices.</p>
+        </div>
+
+        <div class="filters form-grid" style="max-width:900px; margin-bottom:12px; gap:10px;">
+          <div class="field-group">
+            <label for="adminHostelFilter">Hostel</label>
+            <select id="adminHostelFilter">
+              <option value="all">All Hostels</option>
+              <option>HR-1</option>
+              <option>HR-2</option>
+              <option>Girls Hostel</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="adminRollFilter">Roll Number</label>
+            <input id="adminRollFilter" type="text" placeholder="Enter roll or leave empty" />
+          </div>
+          <div class="field-group">
+            <label for="adminFoodTypeFilter">Food Type</label>
+            <select id="adminFoodTypeFilter">
+              <option value="all">All</option>
+              <option value="veg">Veg</option>
+              <option value="nonveg">Non-Veg</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="adminDateFilter">Booking Date</label>
+            <input id="adminDateFilter" type="date" />
+          </div>
+          <div class="field-group" style="align-self:end; margin-top:18px;">
+            <button id="applyAdminFilter" class="btn primary">Apply Filter</button>
+          </div>
+        </div>
+        <div class="admin-settings"
+          style="display:grid; gap:10px; margin-bottom:12px; padding:10px; border:1px solid #e0e7ff; background:#f8fbff; border-radius:8px;">
+          <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+            <label style="font-size:.9rem;"><input id="adminMondayOpen" type="checkbox" style="margin-right:5px;"> Open
+              Monday timeslot</label>
+            <label style="font-size:.9rem;"><input id="adminSaturdayOpen" type="checkbox" style="margin-right:5px;">
+              Open Saturday timeslot</label>
+            <label style="font-size:.9rem;"><input id="adminSpecialSundayBreakfast" type="checkbox"
+                style="margin-right:5px;"> Open Sunday special breakfast slot</label>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <div style="display:flex; gap:6px; align-items:center;"><label>Everyday start</label><input
+                id="everydayStart" type="time" value="18:00" style="height:30px;" /></div>
+            <div style="display:flex; gap:6px; align-items:center;"><label>Everyday end</label><input id="everydayEnd"
+                type="time" value="21:30" style="height:30px;" /></div>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <div style="display:flex; gap:6px; align-items:center;"><label>Saturday start</label><input
+                id="saturdayStart" type="time" value="13:30" style="height:30px;" /></div>
+            <div style="display:flex; gap:6px; align-items:center;"><label>Saturday end</label><input id="saturdayEnd"
+                type="time" value="16:30" style="height:30px;" /></div>
+            <div style="display:flex; gap:6px; align-items:center;"><label>Sunday special start</label><input
+                id="specialStart" type="time" value="18:00" style="height:30px;" /></div>
+            <div style="display:flex; gap:6px; align-items:center;"><label>Sunday special end</label><input
+                id="specialEnd" type="time" value="21:30" style="height:30px;" /></div>
+            <button id="adminSaveTimeWindow" class="btn primary" style="height:36px;">Update Window</button>
+          </div>
+        </div>
+        <p class="error" id="error3"></p>
+        <div class="admin-summary" style="display:flex; gap:20px; margin-bottom:15px; padding:15px; background:#fff; border-radius:8px; border:1px solid #e0e7ff; justify-content: space-around;">
+          <div style="text-align:center;">
+            <div style="font-size:0.8rem; color:#666; text-transform:uppercase;">Total Tokens Today</div>
+            <div id="adminTotalCount" style="font-size:1.5rem; font-weight:bold; color:#1f4f99;">0</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:0.8rem; color:#666; text-transform:uppercase;">Veg Tokens</div>
+            <div id="adminVegCount" style="font-size:1.5rem; font-weight:bold; color:#2e7d32;">0</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:0.8rem; color:#666; text-transform:uppercase;">Non-Veg Tokens</div>
+            <div id="adminNonVegCount" style="font-size:1.5rem; font-weight:bold; color:#d32f2f;">0</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="messTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Roll Number</th>
+                <th>Room Number</th>
+                <th>Hostel</th>
+                <th>Mobile</th>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Food Type</th>
+                <th>Menu Item</th>
+                <th>Booking Date</th>
+                <th>Token ID</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="actions" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <button id="adminDownloadCSV" class="btn ghost">Download CSV</button>
+          <button id="adminClearAll" class="btn secondary">Clear All Records</button>
+          <button id="adminPrint" class="btn secondary">Print Admin List</button>
+          <button id="backToStart" class="btn primary" onclick="window.location.href='index.html'">Go to Student Page</button>
+        </div>
+      </section>
+
+      <!-- Password Prompt overlay -->
+      <div id="adminLoginOverlay" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px); display:flex; align-items:center; justify-content:center; z-index:9999;">
+        <div style="background:white; padding:40px; border-radius:12px; max-width:400px; width:100%; text-align:center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+          <h2 style="margin-bottom:20px; color:var(--primary);">Admin Authentication</h2>
+          <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password" style="width:100%; padding:14px; margin-bottom:20px; border:1px solid var(--border); border-radius:8px; font-size:1rem;" />
+          <button id="adminLoginBtn" class="btn primary" style="width:100%; padding:14px;">Login</button>
+          <p id="adminLoginError" style="color:var(--danger); margin-top:15px; font-weight:500;"></p>
+          <button onclick="window.location.href='index.html'" class="btn ghost" style="width:100%; margin-top:15px;">Return to Main Page</button>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">Built for NIST University hostel mess token management. Dashboard synchronizes automatically.
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

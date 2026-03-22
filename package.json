@@ -1,0 +1,18 @@
+{
+  "name": "nist-mess-token",
+  "version": "1.0.0",
+  "description": "NIST University Hostel Mess Token Management System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^4.22.1",
+    "mongoose": "^9.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

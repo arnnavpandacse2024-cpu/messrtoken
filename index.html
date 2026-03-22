@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NIST University Hostel Mess Token Management System</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-database-compat.js"></script></head>
+
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">NIST University</p>
+        <h1>NIST University Hostel Mess Token Management System</h1>
+        <p class="subtitle">Book your mess token quickly and print your digital token.</p>
+      </div>
+      <div class="logo-card">
+        <span class="logo-pill">NIST</span>
+        <p>Hostel Mess Token</p>
+      </div>
+    </header>
+
+    <main class="card-panel">
+      <div class="progress-wrap">
+        <div class="step active" id="step1dot"><span>1</span><small>Student Info</small></div>
+        <div class="line"></div>
+        <div class="step" id="step2dot"><span>2</span><small>Day & Time</small></div>
+        <div class="line"></div>
+        <div class="step" id="step3dot"><span>3</span><small>Menu</small></div>
+        <div class="line"></div>
+        <div class="step" id="step4dot"><span>4</span><small>Token</small></div>
+      </div>
+
+      <section class="form-page active" id="page1">
+        <div class="section-header">
+          <h2>Student Basic Information</h2>
+          <p>All fields are required. One token per Roll Number.</p>
+        </div>
+
+        <form id="studentForm" class="form-grid">
+          <div class="field-group">
+            <label>University Name</label>
+            <input type="text" value="NIST University" readonly />
+          </div>
+          <div class="field-group">
+            <label for="name">Student Name</label>
+            <input id="name" name="name" type="text" required placeholder="Enter your full name" />
+          </div>
+          <div class="field-group">
+            <label for="roll">Roll Number</label>
+            <input id="roll" name="roll" type="text" required placeholder="e.g. 19xxxxx" />
+          </div>
+          <div class="field-group">
+            <label for="room">Room Number</label>
+            <input id="room" name="room" type="text" required placeholder="Room number" />
+          </div>
+          <div class="field-group">
+            <label for="hostel">Hostel Name</label>
+            <select id="hostel" name="hostel" required>
+              <option value="">Select hostel</option>
+              <option>HR-1</option>
+              <option>HR-2</option>
+              <option>Girls Hostel</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="mobile">Mobile / WhatsApp Number</label>
+            <input id="mobile" name="mobile" type="tel" pattern="[0-9]{10}" required placeholder="10-digit phone" />
+          </div>
+          <div class="actions full-width" style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="submit" class="btn primary">Next / Continue</button>
+            <button type="button" id="adminLoginPre" class="btn secondary" onclick="window.location.href='admin.html'">Admin Portal</button>
+          </div>
+          <p class="error" id="error1"></p>
+        </form>
+      </section>
+
+      <section class="form-page" id="page2">
+        <div class="section-header">
+          <h2>Day &amp; Time Selection</h2>
+          <p>Select days and time based on allowed days.</p>
+        </div>
+        <div class="date-block">
+          <div><span>Today</span><strong id="todayDate"></strong></div>
+          <div><span>Day</span><strong id="todayDay"></strong></div>
+        </div>
+        <p id="dayHint" class="subtitle" style="font-size:.85rem; margin-bottom:8px; color:#2759ff;"></p>
+        <div id="bookingWindowInfo"
+          style="margin-bottom:8px; background:#eef6ff; padding:8px; border-radius:6px; border:1px solid #bae1ff; color:#1f4f99; font-size:.9rem;">
+          Booking open: <strong>6:00 PM - 9:30 PM</strong> every day; additionally <strong>Saturday 1:30 PM - 4:30
+            PM</strong>. Sunday special breakfast can be enabled by admin.</div>
+        <form id="dayForm" class="form-grid">
+          <div class="field-group">
+            <label for="day">Pick Token Day (according to booking rules)</label>
+            <select id="day" required>
+              <option value="">Select an allowed token day</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="time">Time</label>
+            <select id="time" required>
+              <option value="">Choose token day first</option>
+            </select>
+          </div>
+          <div class="actions full-width">
+            <button type="button" class="btn secondary" id="backTo1">Back</button>
+            <button type="submit" class="btn primary">View Mess Menu</button>
+          </div>
+          <p class="error" id="error2"></p>
+        </form>
+      </section>
+
+      <section class="form-page" id="page3">
+        <div class="section-header">
+          <h2>Mess Menu Selection</h2>
+          <p>Choose Veg or Non-Veg and a menu item.</p>
+        </div>
+        <form id="menuForm" class="form-grid">
+          <div class="field-group">
+            <label>Selected Day</label>
+            <input id="selectedDay" readonly />
+          </div>
+          <div class="field-group">
+            <label>Selected Time</label>
+            <input id="selectedTime" readonly />
+          </div>
+          <div class="field-group">
+            <label for="foodType">Food Type</label>
+            <select id="foodType" required>
+              <option value="">Select type</option>
+              <option value="veg">Veg</option>
+              <option value="nonveg">Non-Veg</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="menuItem">Menu Item</label>
+            <select id="menuItem" required>
+              <option value="">Choose food type first</option>
+            </select>
+          </div>
+          <div class="actions full-width">
+            <button type="button" class="btn secondary" id="backTo2">Back</button>
+            <button type="submit" class="btn primary">Submit Token</button>
+          </div>
+          <p class="error" id="error3"></p>
+        </form>
+      </section>
+
+      <section class="form-page" id="page4">
+        <div class="section-header">
+          <h2>Digital Token</h2>
+          <p>Your mess token is generated and ready to print/download.</p>
+        </div>
+        <div class="token-card" id="tokenCard">
+          <div class="token-header">
+            <div class="chip"></div>
+            <div><small>Hostel Mess Token</small><strong id="tokenId">#0000</strong></div>
+          </div>
+          <div class="token-grid">
+            <div><strong>University:</strong> NIST University</div>
+            <div><strong>Name:</strong> <span id="tokenName"></span></div>
+            <div><strong>Roll Number:</strong> <span id="tokenRoll"></span></div>
+            <div><strong>Mobile:</strong> <span id="tokenMobile"></span></div>
+            <div><strong>Hostel:</strong> <span id="tokenHostel"></span></div>
+            <div><strong>Room Number:</strong> <span id="tokenRoom"></span></div>
+            <div><strong>Selected Day:</strong> <span id="tokenDay"></span></div>
+            <div><strong>Time:</strong> <span id="tokenTime"></span></div>
+            <div><strong>Food Item:</strong> <span id="tokenFood"></span></div>
+            <div><strong>Date:</strong> <span id="tokenDate"></span></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="printToken" class="btn primary">Print Token</button>
+          <button id="downloadToken" class="btn secondary">Download Token</button>
+          <button id="showList" class="btn ghost">View Mess List</button>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">Built for NIST University hostel mess token management. Mobile friendly and clean interface.
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
